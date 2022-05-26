@@ -1,3 +1,4 @@
+import e from "express";
 import connectDb from "../connectDb.js";
 
 export function getAllRestaurants(req, res) {
@@ -81,4 +82,38 @@ export function deleteRestaurant(req, res) {
     .catch(err => {
       res.status(500).send(err);
     });
+}
+
+export function updateRestaurantRating(req, res) {
+  const { restaurantId } = req.params;
+  if(!req.body || !req.body.rating || req.body.rating > 5 || req.body.rating < 0) {
+    res.status(401).send('Invalid request');
+  }
+  const newRating = req.body.rating;
+  const db = connectDb();
+  // get the restaurant (hitting Firestore)
+  db.collection('restaurants').doc(restaurantId).get()
+  .then(doc => {
+    const{ ratingList } = doc.data();
+     // do math (doing JS)
+    const newRatingList = (ratingList) ? [...ratingList, newRating] : [newRating]
+    const numRating = newRating.lenght;
+    const rating = newRatingList.reduce((acume, elem) => accum + elem, 0) / numRating;
+    const updateData = { ratingList: newRatingList, numRating, rating }
+      // save restaurant (hitting Firestore)
+
+  // option 1:
+  // return the updated restaurant
+
+
+  // option 2:
+  // return success true/false
+   
+  })
+  .catch(err => {
+    res.status(500).send(err);
+    return;
+  })
+
+
 }
